@@ -1,6 +1,6 @@
 #define ARS_VISUALIZE
 
-#define NOMINMAX 
+#define NOMINMAX
 #include <string>
 
 
@@ -271,7 +271,7 @@ struct AntVecEnv
     using Vector3 = typename Algebra::Vector3;
     using Transform = typename Algebra::Transform;
 
-    
+
     std::vector<std::vector<Scalar>> sim_states_;
     std::vector<std::vector<Scalar>> sim_states_with_action_;
     std::vector<std::vector<Scalar>> sim_states_with_graphics_;
@@ -298,7 +298,7 @@ struct AntVecEnv
             bool learn_bias = true;
             neural_networks_[index].add_linear_layer(tds::NN_ACT_IDENTITY, initial_poses_laikago2.size(),learn_bias);
         }
-        
+
     }
     virtual ~AntVecEnv()
     {
@@ -314,8 +314,8 @@ struct AntVecEnv
       //std::cout<<"seed:" << s << std::endl;
       std::srand(s);
     }
-    
-    
+
+
 
     std::vector< std::vector<double> > reset(CudaModel<MyScalar>& cuda_model_ant)
     {
@@ -328,7 +328,7 @@ struct AntVecEnv
 
             if (contact_sim.mb_->is_floating())
             {
-            
+
                 sim_states_[index][0] = start_orn.x();
                 sim_states_[index][1] = start_orn.y();
                 sim_states_[index][2] = start_orn.z();
@@ -378,7 +378,7 @@ struct AntVecEnv
         {
             step(cuda_model_ant, zero_actions, observations, rewards, dones);
         }
-        
+
         //for (auto v : sim_state)
         //    std::cout << v << std::endl;
         return observations;
@@ -405,12 +405,12 @@ struct AntVecEnv
             }
             inputs[index] = sim_states_with_action_[index];
         }
-    
+
 
 //#define DEBUG_ON_CPU
 #ifdef DEBUG_ON_CPU
-        
-        
+
+
         for (int index =0; index<g_num_total_threads;index++)
         {
             sim_states_with_graphics_[index] = contact_sim(sim_states_with_action_[index]);
@@ -430,9 +430,9 @@ struct AntVecEnv
 
                 sim_states_[index].resize(contact_sim.input_dim());
                 observations[index] = sim_states_[index];
-        
-               
-            
+
+
+
 #ifdef USE_ANT
                 //reward forward along x-axis
                 rewards[index] = sim_states_[index][0];
@@ -454,20 +454,20 @@ struct AntVecEnv
                     max_reward = rewards[index];
                     //printf("max_reward = %f\n",max_reward);
                 }
-            
+
 
                 //Ant height needs to stay above 0.25a
 #ifdef USE_ANT
                 if (sim_states_[index][2] < 0.26)
 #else
 
-                Algebra::Quaternion base_orn(sim_states_[index][0],sim_states_[index][1],sim_states_[index][2],sim_states_[index][3]);
+                MyAlgebra::Quaternion base_orn(sim_states_[index][0],sim_states_[index][1],sim_states_[index][2],sim_states_[index][3]);
                 auto base_mat = Algebra::quat_to_matrix(base_orn);
                 Scalar up_dot_world_z = base_mat(2, 2);
-    
+
                 // Laikago torso height needs to be in range 0.3 to 1. meter
-               
-            
+
+
                 if (up_dot_world_z < 0.8 || ( laikago_z< 0.3) || (laikago_z > 1.))
 #endif
                 {
@@ -486,9 +486,9 @@ struct AntVecEnv
     inline const std::vector<double> policy(int index, const std::vector<double>& obs)
     {
         std::vector<double> action (initial_poses_laikago2.size(), Scalar(0));
-    
+
         neural_networks_[index].compute(obs, action);
-                
+
         return action;
     }
 
@@ -517,7 +517,7 @@ int num_base_instances;
 void visualize_trajectories(std::vector<std::vector<std::vector<double>>>& trajectories, int step, bool sleep)
 {
      float sim_spacing = 5;
-     
+
 
      for (int index=0;index<g_num_total_threads;index++)
      {
@@ -525,11 +525,11 @@ void visualize_trajectories(std::vector<std::vector<std::vector<double>>>& traje
           const int square_id = (int)std::sqrt((double)g_num_total_threads);
           int offset = contact_sim.mb_->dof() + contact_sim.mb_->dof_qd();
           int instance_index = index*num_instances_per_robot;
-  
+
             {
                 char msg[1024];
                 sprintf(msg, "(%d)", index);
-                visualizer.m_opengl_app.draw_text_3d(msg, sim_spacing * (index % square_id) - square_id * sim_spacing / 2, 
+                visualizer.m_opengl_app.draw_text_3d(msg, sim_spacing * (index % square_id) - square_id * sim_spacing / 2,
                     sim_spacing * (index / square_id) - square_id * sim_spacing / 2, 1, 1);
             }
 
@@ -552,7 +552,7 @@ void visualize_trajectories(std::vector<std::vector<std::vector<double>>>& traje
             visualizer.m_opengl_app.m_renderer->write_single_instance_transform_to_cpu(pos, orn, visual_instance_id);
           }
 
-          for (int l = 0; l < contact_sim.mb_->links_.size(); l++) 
+          for (int l = 0; l < contact_sim.mb_->links_.size(); l++)
           {
             //int l = ll-5;
             for (int v = 0; v < num_instances[l]; v++)
@@ -566,7 +566,7 @@ void visualize_trajectories(std::vector<std::vector<std::vector<double>>>& traje
                     float z = sim_states_with_graphics[step][offset + l * 7 + 5];
                     float w = sim_states_with_graphics[step][offset + l * 7 + 6];
 
-                    if (x == 0.f && y == 0.f && z == 0.f && w == 0.f) 
+                    if (x == 0.f && y == 0.f && z == 0.f && w == 0.f)
                     {
                     } else
                     {
@@ -583,7 +583,7 @@ void visualize_trajectories(std::vector<std::vector<std::vector<double>>>& traje
                         pos[0] += sim_spacing * (index % square_id) - square_id * sim_spacing / 2;
                         pos[1] += sim_spacing * (index / square_id) - square_id * sim_spacing / 2;
 
-                       
+
                         visualizer.m_opengl_app.m_renderer->write_single_instance_transform_to_cpu(pos, orn, visual_instance_id);
                     }
                 }
@@ -592,7 +592,7 @@ void visualize_trajectories(std::vector<std::vector<std::vector<double>>>& traje
      }
 
     visualizer.render();
-   
+
     if (sleep)
     {
         std::this_thread::sleep_for(std::chrono::duration<double>(1./240.));//frameskip_gfx_sync* contact_sim.dt));
@@ -612,8 +612,8 @@ struct Worker
     int rollout_length_eval_;
     int rollout_length_train_;
     double delta_std_;
-    
-    
+
+
     Environment env_;
 
     SharedNoiseTable noise_table_;
@@ -640,7 +640,7 @@ struct Worker
             observation_filters_[i].resize(env_.observation_dim_);
         }
     }
-        
+
     virtual ~Worker()
     {
     }
@@ -648,13 +648,13 @@ struct Worker
     void get_weights_plus_stats(std::vector<double>& weights) {
         //return self.policy.get_weights_plus_stats()
     }
-    
-    //Performs parallel rollouts of maximum length rollout_length. 
+
+    //Performs parallel rollouts of maximum length rollout_length.
     //At each time-step it substracts shift from the reward.
     void rollouts(CudaModel<MyScalar>& cuda_model_ant, double shift, int rollout_length, std::vector<double>& total_rewards, std::vector<int>& vec_steps, std::vector< std::vector<std::vector<double> > >& trajectories)
     {
 
-        
+
 
         if (rollout_length == 0)
         {
@@ -665,7 +665,7 @@ struct Worker
         //}
 
         auto observations = env_.reset(cuda_model_ant);
-        
+
         for (int index=0;index<g_num_total_threads;index++)
         {
             vec_steps[index] = 0;
@@ -677,9 +677,9 @@ struct Worker
         dones.resize(g_num_total_threads);
 
         std::vector<std::vector<double> > actions(g_num_total_threads);
-        
-          
-       for (int r =0;r<rollout_length;r++) 
+
+
+       for (int r =0;r<rollout_length;r++)
        {
            for (int index=0;index<g_num_total_threads;index++)
            {
@@ -723,8 +723,8 @@ struct Worker
                     total_rewards[index] += (rewards[index] - shift);
                     vec_steps[index]++;
                }
-               
-                
+
+
            }
         }
     }
@@ -752,26 +752,26 @@ struct Worker
 
 
     //Generate multiple rollouts with a policy parametrized by w_policy.
-    void do_rollouts(CudaModel<MyScalar>& cuda_model_ant, std::vector<double>& rollout_rewards, std::vector<int>& deltas_idx, int& steps, 
+    void do_rollouts(CudaModel<MyScalar>& cuda_model_ant, std::vector<double>& rollout_rewards, std::vector<int>& deltas_idx, int& steps,
         const std::vector<double>& w_policy, int num_rollouts, int shift, bool evaluate,
         std::vector<std::vector<std::vector<double> > >& trajectories) {
 
         steps = 0;
-        
+
         std::vector<double> tmp;
         trajectories.resize(g_num_total_threads);
 
         bool use_std_deviation = false;//!evaluate;
 
         if (evaluate) {
-                
+
             //policy.update_weights(w_policy);
             for (int index=0;index<g_num_total_threads;index++)
             {
                 env_.init_neural_network(index, w_policy);
                 deltas_idx.push_back(-1);
             }
-                
+
             //set to false so that evaluation rollouts are not used for updating state statistics
             //policy.update_filter = false;
 
@@ -783,7 +783,7 @@ struct Worker
             vec_r_steps.resize(g_num_total_threads);
 
             rollouts(cuda_model_ant, 0, rollout_length_eval_, rewards, vec_r_steps, trajectories);
-            
+
             for (int step=0;step< trajectories[0].size();step++)
             {
                 visualize_trajectories(trajectories, step, false);
@@ -806,7 +806,7 @@ struct Worker
                 //delta = (self.delta_std * delta).reshape(w_policy.shape)
                 deltas_idx.push_back(delta_idx);
 
-                //# set to true so that state statistics are updated 
+                //# set to true so that state statistics are updated
                 //self.policy.update_filter = True
 
                 //# compute reward and number of timesteps used for positive perturbation rollout
@@ -826,14 +826,14 @@ struct Worker
             pos_rewards.resize(g_num_total_threads);
             std::vector<int> vec_pos_steps;
             vec_pos_steps.resize(g_num_total_threads);
-            
+
             rollouts(cuda_model_ant, shift, rollout_length_train_, pos_rewards, vec_pos_steps, trajectories);
-            
+
             //for (int step=0;step< trajectories[0].size();step++)
             //{
             //    visualize_trajectories(trajectories, step, false);
             //}
-                        
+
             for (int index=0;index<g_num_total_threads;index++)
             {
                 std::vector<double> weights;
@@ -872,7 +872,7 @@ struct Worker
                 }
             }
         }
-        
+
         if (use_std_deviation)
         {
             double std_dev = std_deviation(tmp);
@@ -888,22 +888,22 @@ struct Worker
             }
         }
     }
- 
+
 };
 
 
 
-struct ARSLearner 
+struct ARSLearner
 {
     std::vector<double> w_policy;
 
     int total_timesteps{0};
     int num_deltas_{g_num_total_threads};
     int shift_{0};
-    
+
     std::vector<double> deltas_;
 
-    
+
     Worker* worker_{0};
     int rollout_length_train_{2000};
     int rollout_length_eval_{6000};
@@ -921,18 +921,18 @@ struct ARSLearner
         init_deltas();
 
         int env_seed=12345;//421;
-        
+
         PolicyParams policy_params;
-        
-        
+
+
         Environment tmpenv;
         int params_dim = tmpenv.neural_networks_[0].num_parameters();
-        
+
         //does it have to be random to start? deltas will take care of it
         w_policy.resize(params_dim);
-        
+
         worker_ = new Worker (env_seed, params_dim, policy_params, deltas_, rollout_length_train_, rollout_length_eval_, delta_std_);
-        
+
         myfile_.open ("ars_cpp_log.txt");
         myfile_ << "Time	Iteration	AverageReward	MaxRewardRollout	MinRewardRollout	timesteps" << std::endl;
 
@@ -963,7 +963,7 @@ struct ARSLearner
         get_deltas(deltas_idx[0], tmp_delta);
         g_hat.resize(tmp_delta.size());
         num_items_summed = 0;
-      
+
         for (int i=0;i< weights.size();i++)
         {
             get_deltas(deltas_idx[i], tmp_delta);
@@ -980,7 +980,7 @@ struct ARSLearner
             g_hat[i] /= deltas_idx.size();
         }
     }
-    
+
 
     void init_deltas()
     {
@@ -991,7 +991,7 @@ struct ARSLearner
         double mean=0.0, sigma=1.0;
         //https://numpy.org/doc/1.16/reference/generated/numpy.random.RandomState.randn.html#numpy.random.RandomState.randn
         std::normal_distribution<double> distribution(mean, sigma);
-        
+
         //what size is reasonable?
         int count=25000000;
         //int count=2500000;
@@ -1006,9 +1006,9 @@ struct ARSLearner
 
     //Aggregate update step from rollouts generated in parallel.
     std::vector<double> aggregate_rollouts(int num_rollouts, bool evaluate, std::vector<std::vector<std::vector<double> > >& trajectories) {
-          
+
         int num_deltas = (num_rollouts == 0)? num_deltas_ : num_rollouts;
-            
+
         //# put policy weights in the object store
         //policy_id = ray.put(self.w_policy)
 
@@ -1020,7 +1020,7 @@ struct ARSLearner
         std::vector<int> deltas_idx;
         int steps;
         worker_->do_rollouts(cuda_model_ant_, rollout_rewards, deltas_idx, steps, w_policy, num_rollouts, shift_, evaluate, trajectories);
-        
+
         total_timesteps += steps;
 
 
@@ -1034,12 +1034,12 @@ struct ARSLearner
         //max_rewards = np.max(rollout_rewards, axis = 1)
         //if self.deltas_used > self.num_deltas:
         //    self.deltas_used = self.num_deltas
-            
+
         //idx = np.arange(max_rewards.size)[max_rewards >= np.percentile(max_rewards, 100*(1 - (self.deltas_used / self.num_deltas)))]
         //deltas_idx = deltas_idx[idx]
         //rollout_rewards = rollout_rewards[idx,:]
-        
-       
+
+
         std::vector<double> g_hat;
         int num_items_summed=0;
 
@@ -1076,12 +1076,12 @@ struct ARSLearner
     void train(int num_iter)
     {
         double best_mean_rewards = -1e30;
-        
+
         for (int iter=0;iter< num_iter;iter++) {
             //printf("iteration=%d\n", iter);
 
             auto t1 = std::chrono::steady_clock::now();
-            
+
             train_step();
 
             //update mean/std
@@ -1107,7 +1107,7 @@ struct ARSLearner
             //print('iter ', i,' done')
 
             //record statistics every 10 iterations
-            if ((iter + 1) % 10 == 0) 
+            if ((iter + 1) % 10 == 0)
             {
 
                 int num_rollouts = g_num_total_threads;//todo: expose/tune this value (100 in ARS)
@@ -1149,10 +1149,10 @@ struct ARSLearner
                             trajfile_.write((char*)&num_steps, sizeof(int));
                             int state_size = trajectories[0][0].size();
                             trajfile_.write((char*)&state_size, sizeof(int));
-                        
+
                             for (int step=0;step<num_steps;step++)
                             {
-                            
+
                                 for (int state=0;state < state_size;state++)
                                 {
                                     trajfile_.write((char*)&trajectories[0][step][state], sizeof(double));
@@ -1162,8 +1162,8 @@ struct ARSLearner
                             best_mean_rewards = mean_rewards;
                             //save policy
                             printf("best policy, mean = %f at %d steps\n", mean_rewards, total_timesteps);
-                       
-                   
+
+
 
                              for (int w=0;w<this->w_policy.size();w++)
                                 {
@@ -1201,13 +1201,13 @@ struct ARSLearner
 #if 0
                 w = ray.get(self.workers[0].get_weights_plus_stats.remote())
                 np.savez(self.logdir + "/lin_policy_plus_latest", w)
-                
+
                 mean_rewards = np.mean(rewards)
                 if (mean_rewards > best_mean_rewards):
                   best_mean_rewards = mean_rewards
                   np.savez(self.logdir + "/lin_policy_plus_best_"+str(i+1), w)
-                  
-                
+
+
                 print(sorted(self.params.items()))
                 logz.log_tabular("Time", time.time() - start)
                 logz.log_tabular("Iteration", i + 1)
@@ -1233,10 +1233,10 @@ struct ARSLearner
             setting_filters_ids = [worker.sync_filter.remote(filter_id) for worker in self.workers]
             # waiting for sync of all workers
             ray.get(setting_filters_ids)
-         
+
             increment_filters_ids = [worker.stats_increment.remote() for worker in self.workers]
             # waiting for increment of all workers
-            ray.get(increment_filters_ids)            
+            ray.get(increment_filters_ids)
             t2 = time.time()
             print('Time to sync statistics:', t2 - t1)
 #endif
@@ -1250,24 +1250,24 @@ struct ARSLearner
 
 int main()
 {
-  
-  
 
-    
-    
+
+
+
+
     CudaModel<MyScalar> cuda_model_ant(model_name);
 
-    
+
     cuda_model_ant.forward_zero.allocate(g_num_total_threads);
 
-  
+
 #ifdef ARS_VISUALIZE
   visualizer.delete_all();
   int input_dim = contact_sim.input_dim();
-  
+
 
   //int sphere_shape = visualizer.m_opengl_app.register_graphics_unit_sphere_shape(SPHERE_LOD_LOW);
-  
+
   {
       std::vector<int> shape_ids;
       std::string plane_filename;
@@ -1281,7 +1281,7 @@ int main()
   //int sphere_shape = shape_ids[0];
   //TinyVector3f color = colors[0];
   // typedef tds::Conversion<DiffAlgebra, tds::TinyAlgebraf> Conversion;
-  
+
   bool create_instances = false;
   char search_path[TINY_MAX_EXE_PATH_LEN];
   std::string texture_path = "";
@@ -1292,8 +1292,8 @@ int main()
       TINY_MAX_EXE_PATH_LEN);
   visualizer.m_path_prefix = search_path;
   visualizer.convert_visuals(urdf_structures, texture_path);
-  
-  
+
+
 
 
   for (int t = 0;t< g_num_total_threads;t++)
@@ -1324,7 +1324,7 @@ int main()
       num_base_instances = 0;
 #endif
       for (int i = 0; i < contact_sim.mb_->num_links(); ++i) {
-         
+
 
           int uid = urdf_structures.links[i].urdf_visual_shapes[0].visual_shape_uid;
           OpenGLUrdfVisualizer<MyAlgebra>::TinyVisualLinkInfo& vis_link = visualizer.m_b2vis[uid];
@@ -1353,7 +1353,7 @@ int main()
 #if 0
   std::string file_name = "D:/dev/tds/tiny-differentiable-simulator/build_cmake/examples/ars/trajectory_reward117.566790.bin";
     std::ifstream trajfile_;
-                        
+
     trajfile_.open (file_name,std::ios_base::binary);
 
     int num_steps;
@@ -1369,10 +1369,10 @@ int main()
         {
             trajfile_.read((char*)&sim_state_with_graphics[state], sizeof(double));
         }
-   
+
         visualize_trajectory(sim_state_with_graphics);
   }
-    
+
   trajfile_.close();
   #endif
 

@@ -32,11 +32,9 @@ void integrate_euler(MultiBody<Algebra> &mb, typename Algebra::VectorX &q,
 
     mb.base_velocity().top = Vector3(qd[0], qd[1], qd[2]);
 #ifdef TDS_USE_LEFT_ASSOCIATIVE_TRANSFORMS
-    mb.base_velocity().bottom =
-        mb.base_X_world().rotation * Vector3(qd[3], qd[4], qd[5]);
+    mb.base_velocity().bottom = mb.base_X_world().rotation * Vector3(qd[3], qd[4], qd[5]);
 #else
-    mb.base_velocity().bottom = Algebra::transpose(mb.base_X_world().rotation) *
-                                Vector3(qd[3], qd[4], qd[5]);
+    mb.base_velocity().bottom = Algebra::transpose(mb.base_X_world().rotation) * Vector3(qd[3], qd[4], qd[5]);
 #endif
 
     // update base orientation using Quaternion derivative
@@ -47,8 +45,7 @@ void integrate_euler(MultiBody<Algebra> &mb, typename Algebra::VectorX &q,
     // Algebra::matrix_to_quat(mb.base_X_world().rotation); Algebra::print("Base
     // quat (TDS): ", base_rot); Algebra::print("base_rot", base_rot); update
     // 4-dimensional q from 3-dimensional qd for the base rotation
-    Algebra::quat_increment(
-        base_rot, Algebra::quat_velocity(base_rot, angular_velocity, dt));
+    Algebra::quat_increment(base_rot, Algebra::quat_velocity(base_rot, angular_velocity, dt));
     base_rot = Algebra::normalize(base_rot);
     mb.base_X_world().rotation = Algebra::quat_to_matrix(base_rot);
 
@@ -59,7 +56,7 @@ void integrate_euler(MultiBody<Algebra> &mb, typename Algebra::VectorX &q,
     q[4] += qd[3] * dt;
     q[5] += qd[4] * dt;
     q[6] += qd[5] * dt;
-    
+
   }
 
   for (auto &link: mb.links()){
@@ -75,8 +72,7 @@ void integrate_euler(MultiBody<Algebra> &mb, typename Algebra::VectorX &q,
         auto base_rot = Algebra::quat_from_xyzw(q[qindex + 0], q[qindex + 1], q[qindex + 2], q[qindex + 3]);
 
         auto tmp = Algebra::quat_velocity_spherical(base_rot, Vector3(qd[qdindex], qd[qdindex + 1], qd[qdindex + 2]), dt);
-        Algebra::quat_increment(
-                  base_rot, tmp);
+        Algebra::quat_increment(base_rot, tmp);
 
         base_rot = Algebra::normalize(base_rot);
 //        base_rot = Algebra::quat_integrate(base_rot, Vector3(qd[qdindex], qd[qdindex + 1], qd[qdindex + 2]), dt);
@@ -122,13 +118,11 @@ void integrate_euler_qdd(MultiBody<Algebra>& mb, typename Algebra::VectorX& q,
         mb.base_velocity().top = Vector3(qd[0], qd[1], qd[2]);
         mb.base_velocity().bottom = Vector3(qd[3], qd[4], qd[5]);
 
-    
+
 #ifdef TDS_USE_LEFT_ASSOCIATIVE_TRANSFORMS
-    mb.base_velocity().bottom =
-        mb.base_X_world().rotation * Vector3(qd[3], qd[4], qd[5]);
+    mb.base_velocity().bottom = mb.base_X_world().rotation * Vector3(qd[3], qd[4], qd[5]);
 #else
-    mb.base_velocity().bottom = Algebra::transpose(mb.base_X_world().rotation) *
-                                Vector3(qd[3], qd[4], qd[5]);
+    mb.base_velocity().bottom = Algebra::transpose(mb.base_X_world().rotation) * Vector3(qd[3], qd[4], qd[5]);
 #endif
 
         mb.base_velocity() += mb.base_acceleration() * dt;
@@ -143,7 +137,7 @@ void integrate_euler_qdd(MultiBody<Algebra>& mb, typename Algebra::VectorX& q,
         for (int i = 0; i < 3; i++) {
 		    int qdindex = i + qd_offset;
 		    qd[qdindex] += qdd[qdindex] * dt;
-		    
+
 		}
     }
 
