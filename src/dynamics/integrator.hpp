@@ -169,4 +169,22 @@ void integrate_euler_qdd(MultiBody<Algebra>& mb,
     integrate_euler_qdd(mb, mb.q(), mb.qd(), mb.qdd(), dt);
     Algebra::set_zero(mb.qdd());
 }
+
+
+template <typename Algebra>
+void integrate_rkmk2(MultiBody<Algebra> &mb, typename Algebra::VectorX &q,
+                     typename Algebra::VectorX &qd,
+                     const typename Algebra::VectorX &qdd,
+                     const typename Algebra::Scalar &dt) {
+    // TODO
+}
+
+template <typename Algebra>
+void integrate_rkmk2_qdd(MultiBody<Algebra>& mb, typename Algebra::VectorX& q,
+    typename Algebra::VectorX& qd,
+    const typename Algebra::VectorX& qdd,
+    const typename Algebra::Scalar& dt) {
+    // TODO
+}
+
 }  // namespace tds
